@@ -1,0 +1,18 @@
+
+body {
+  font-family: sans-serif;
+  text-align: center;
+  padding: 2em;
+}
+h1 {
+  font-size: 2em;
+}
+button {
+  font-size: 1.2em;
+  padding: 0.5em 1em;
+}
+#current, #winner {
+  margin-top: 2em;
+  font-size: 1.5em;
+  color: #b31312;
+}
