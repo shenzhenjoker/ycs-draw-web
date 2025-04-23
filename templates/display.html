@@ -1,0 +1,38 @@
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>抽奖大屏</title>
+    <style>
+        body { background: #111; color: #fff; font-family: sans-serif; text-align: center; padding: 30px; }
+        h1 { font-size: 48px; margin-bottom: 20px; }
+        #winner { font-size: 36px; margin-top: 30px; white-space: pre-line; }
+        #prize-img { margin-top: 20px; max-height: 300px; }
+    </style>
+</head>
+<body>
+    <h1 id="prize">当前奖项</h1>
+    <div id="winner">等待抽奖...</div>
+    <img id="prize-img" src="" alt="奖品图片" />
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script>
+        const socket = io();
+        socket.on("prize_updated", prize => {
+            document.getElementById("prize").innerText = prize;
+            document.getElementById("winner").innerText = "等待抽奖...";
+            document.getElementById("prize-img").src = "";
+        });
+        socket.on("draw_result", data => {
+            if (data.error) {
+                document.getElementById("winner").innerText = data.error;
+                return;
+            }
+            const names = data.winners.map(w => w["姓名"] + "（" + w["国籍"] + "）").join("\n");
+            document.getElementById("winner").innerText = names;
+            document.getElementById("prize").innerText = data.prize;
+            document.getElementById("prize-img").src = "/static/" + data.image;
+        });
+    </script>
+</body>
+</html>
