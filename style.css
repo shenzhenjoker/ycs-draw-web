@@ -1,0 +1,65 @@
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  background: black;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+canvas#bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: -2;
+  width: 100vw;
+  height: 100vh;
+  background: black;
+}
+
+.overlay {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 40px 60px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: white;
+  text-align: center;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+  z-index: 1;
+}
+
+h1 {
+  font-size: 3em;
+  text-shadow: 0 0 10px #fff;
+  margin-bottom: 30px;
+}
+
+.winner-text {
+  font-size: 2.5em;
+  animation: glow 1.5s ease-in-out infinite alternate, popIn 0.5s ease forwards;
+}
+
+@keyframes glow {
+  from {
+    text-shadow: 0 0 20px #ff4, 0 0 40px #f0f;
+  }
+  to {
+    text-shadow: 0 0 30px #fff, 0 0 60px #fff;
+  }
+}
+
+@keyframes popIn {
+  0% { transform: scale(0.7); opacity: 0.4; }
+  100% { transform: scale(1); opacity: 1; }
+}
