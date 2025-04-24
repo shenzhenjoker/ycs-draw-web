@@ -1,0 +1,89 @@
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <title>抽奖控制面板</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', 'PingFang SC', sans-serif;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 2em;
+    }
+    input[type="file"] {
+      margin: 10px 0;
+    }
+    #draw {
+      margin-top: 10px;
+      padding: 6px 16px;
+      font-size: 16px;
+    }
+    .log {
+      margin-top: 20px;
+      color: gray;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎛️ 抽奖控制面板</h1>
+  <input type="file" id="namesFile" accept=".csv" />
+  <br />
+  <input type="file" id="prizeFile" accept=".csv" />
+  <br />
+  <button id="draw">开始抽奖</button>
+  <div class="log" id="log">当前抽中：暂无</div>
+
+  <script>
+    let names = [];
+    let prizes = [];
+    let prizeIndex = 0;
+
+    function parseCSV(text) {
+      const rows = text.trim().split("\n");
+      return rows.map(r => r.split(","));
+    }
+
+    document.getElementById("namesFile").addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = () => {
+        names = parseCSV(reader.result);
+        console.log("导入名单：", names.length);
+      };
+      reader.readAsText(file);
+    });
+
+    document.getElementById("prizeFile").addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = () => {
+        prizes = parseCSV(reader.result);
+        console.log("导入奖品：", prizes.length);
+      };
+      reader.readAsText(file);
+    });
+
+    const channel = new BroadcastChannel("draw-channel");
+    document.getElementById("draw").onclick = () => {
+      if (!names.length || !prizes.length) return alert("请先导入CSV文件");
+
+      const pick = names[Math.floor(Math.random() * names.length)];
+      const currentPrize = prizes[prizeIndex % prizes.length];
+      prizeIndex++;
+
+      const data = {
+        text: `${pick[0]}｜${pick[1]}｜${pick[2]}`,
+        prize: currentPrize[0],
+        img: currentPrize[1],
+        price: currentPrize[2],
+        qty: currentPrize[3]
+      };
+
+      channel.postMessage(data);
+      document.getElementById("log").textContent = `当前抽中：${data.text}｜${data.prize}`;
+    };
+  </script>
+</body>
+</html>
