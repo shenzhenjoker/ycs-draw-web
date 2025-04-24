@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>抽奖控制界面</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      background: #111;
+      color: #fff;
+      font-family: sans-serif;
+      text-align: center;
+      padding: 2rem;
+    }
+    h1 {
+      color: gold;
+      text-shadow: 0 0 10px gold;
+    }
+    input[type="file"] {
+      margin: 1rem;
+    }
+    button {
+      padding: 0.6rem 2rem;
+      font-size: 1.2rem;
+      background: gold;
+      border: none;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+    .status {
+      margin-top: 2rem;
+      font-size: 1.2rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎛️ 抽奖控制界面</h1>
+  <p>上传参赛者 CSV（编号,姓名,国籍）：</p>
+  <input type="file" id="participants" accept=".csv"><br>
+  <p>上传奖品 CSV（奖项名,奖品名,图片路径,价值,数量）：</p>
+  <input type="file" id="prizes" accept=".csv"><br>
+  <button onclick="draw()">开始抽奖</button>
+  <div class="status" id="status">等待上传...</div>
+
+  <script>
+    const bc = new BroadcastChannel("draw-channel");
+    let participants = [], prizes = [], prizeIndex = 0;
+
+    function readCSV(file, callback) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const rows = reader.result.split("\n").map(row => row.split(","));
+        callback(rows);
+      };
+      reader.readAsText(file);
+    }
+
+    document.getElementById("participants").addEventListener("change", e => {
+      readCSV(e.target.files[0], data => {
+        participants = data;
+        document.getElementById("status").textContent = `✅ 已上传参赛者 ${data.length} 条`;
+      });
+    });
+
+    document.getElementById("prizes").addEventListener("change", e => {
+      readCSV(e.target.files[0], data => {
+        prizes = data;
+        document.getElementById("status").textContent += `，已上传奖品 ${data.length} 条`;
+      });
+    });
+
+    function draw() {
+      if (!participants.length || !prizes.length) {
+        document.getElementById("status").textContent = "⚠️ 请先上传参赛者和奖品 CSV";
+        return;
+      }
+      const p = participants[Math.floor(Math.random() * participants.length)];
+      const prize = prizes[prizeIndex % prizes.length];
+      prizeIndex++;
+      bc.postMessage({
+        prizeTitle: prize[0],
+        name: prize[1],
+        img: prize[2],
+        price: prize[3],
+        qty: prize[4],
+        text: `${p[0]}｜${p[1]}｜${p[2]}`
+      });
+      document.getElementById("status").textContent = `🎉 已抽中：${p[1]}，奖品：${prize[1]}`;
+    }
+  </script>
+</body>
+</html>
