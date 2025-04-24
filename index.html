@@ -1,0 +1,86 @@
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>抽奖控制面板</title>
+  <style>
+    body {
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: linear-gradient(to bottom, #111, #222);
+      color: white;
+      margin: 0;
+      padding: 40px;
+    }
+    h1 {
+      font-size: 2.5em;
+      text-shadow: 0 0 8px gold;
+    }
+    label {
+      display: block;
+      margin-top: 20px;
+    }
+    input[type="file"] {
+      margin: 12px 0;
+    }
+    select, button {
+      font-size: 1.2em;
+      padding: 10px;
+      margin-top: 20px;
+      border-radius: 6px;
+      border: none;
+    }
+    button {
+      background: gold;
+      color: black;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎛️ 抽奖控制面板</h1>
+  <label>上传参与者 CSV（编号,姓名,国籍）:</label>
+  <input type="file" id="csvInput" accept=".csv">
+
+  <label>选择奖项：</label>
+  <select id="prizeSelector">
+    <option value="特等奖">特等奖</option>
+    <option value="一等奖">一等奖</option>
+    <option value="二等奖">二等奖</option>
+    <option value="三等奖">三等奖</option>
+  </select>
+
+  <br><button onclick="draw()">开始抽奖</button>
+
+  <script>
+    let participants = [];
+    const channel = new BroadcastChannel("draw-channel");
+
+    document.getElementById("csvInput").addEventListener("change", function(event) {
+      const file = event.target.files[0];
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const lines = e.target.result.split(/\r?\n/);
+        participants = lines
+          .map(line => line.trim().split(","))
+          .filter(arr => arr.length >= 3)
+          .map(arr => ({ id: arr[0], name: arr[1], nation: arr[2] }));
+        alert("参赛者载入完成，共 " + participants.length + " 人");
+      };
+      reader.readAsText(file, "utf-8");
+    });
+
+    function draw() {
+      if (participants.length === 0) {
+        alert("请先上传 CSV 文件！");
+        return;
+      }
+      const prize = document.getElementById("prizeSelector").value;
+      const index = Math.floor(Math.random() * participants.length);
+      const person = participants[index];
+      const text = `🎯 ${person.id}｜${person.name}｜${person.nation}`;
+      channel.postMessage({ text: text, prize: prize });
+    }
+  </script>
+</body>
+</html>
